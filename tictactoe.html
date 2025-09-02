@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Tic-Tac-Toe</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #1f2833 0%, #0b0c0f 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        #main-menu, #game-container {
+            background-color: #2a323c;
+            padding: 2.5rem;
+            border-radius: 2rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+            text-align: center;
+            max-width: 550px;
+            width: 100%;
+            transition: all 0.3s ease-in-out;
+        }
+
+        @media (max-width: 600px) {
+            #main-menu, #game-container {
+                padding: 1.5rem;
+                border-radius: 1.5rem;
+            }
+        }
+
+        .hidden {
+            display: none;
+        }
+        
+        .menu-subtitle {
+            font-size: 1.5rem;
+            font-weight: 500;
+            color: #c5c6c7;
+            margin-bottom: 0.5rem;
+        }
+
+        h1 {
+            font-size: 2.75rem;
+            font-weight: 700;
+            color: #c5c6c7;
+            margin-bottom: 1rem;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+        }
+
+        #message {
+            font-size: 1.35rem;
+            font-weight: 500;
+            color: #a9b1b7;
+            height: 30px;
+            margin-bottom: 2rem;
+            transition: color 0.3s;
+        }
+
+        #board {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .square {
+            width: 100%;
+            height: 100px;
+            background-color: #3a4450;
+            border-radius: 1rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 3.5rem;
+            font-weight: bold;
+            color: #c5c6c7;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+        }
+
+        .square:hover:not(.player):not(.cpu) {
+            background-color: #4a525f;
+            transform: scale(1.05);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5);
+        }
+
+        .square.player {
+            color: #45a29e; /* Biru kehijauan untuk 'X' */
+            text-shadow: 2px 2px 4px rgba(69, 162, 158, 0.4);
+        }
+
+        .square.cpu, .square.p2 {
+            color: #ff6b6b; /* Merah cerah untuk 'O' */
+            text-shadow: 2px 2px 4px rgba(255, 107, 107, 0.4);
+        }
+
+        .square.winner {
+            background-color: #2ecc71;
+            color: white;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.08); }
+            100% { transform: scale(1); }
+        }
+
+        #difficulty-container {
+            margin-bottom: 1.5rem;
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+        }
+        
+        .control-buttons {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        button {
+            padding: 0.75rem 1.75rem;
+            border-radius: 9999px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease-in-out;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+        }
+
+        .btn-difficulty {
+            background-color: #4a525f;
+            color: #c5c6c7;
+        }
+
+        .btn-difficulty.active {
+            background-color: #66fcf1;
+            color: #0b0c0f;
+            box-shadow: 0 6px 12px rgba(102, 252, 241, 0.4);
+        }
+
+        .btn-menu {
+            width: 100%;
+            margin-bottom: 1rem;
+            font-size: 1.25rem;
+            background: linear-gradient(45deg, #45a29e, #1f2833);
+            color: white;
+        }
+
+        .btn-menu:last-child {
+            margin-bottom: 0;
+        }
+
+        .btn-menu:hover {
+            box-shadow: 0 8px 16px rgba(69, 162, 158, 0.2);
+            transform: translateY(-3px);
+        }
+        
+        .btn-menu:active {
+            transform: scale(0.95);
+        }
+
+        #new-round-button, #new-game-button {
+            width: 100%;
+        }
+
+        #new-round-button {
+            background: linear-gradient(45deg, #2ecc71, #27ae60);
+            color: white;
+        }
+        
+        #new-game-button {
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+            color: white;
+        }
+
+        #new-round-button:hover {
+            box-shadow: 0 8px 16px rgba(46, 204, 113, 0.2);
+            transform: translateY(-3px);
+        }
+        
+        #new-game-button:hover {
+            box-shadow: 0 8px 16px rgba(231, 76, 60, 0.2);
+            transform: translateY(-3px);
+        }
+        
+        #new-round-button:active, #new-game-button:active {
+            transform: scale(0.95);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+        }
+
+        #back-button {
+            background-color: #7f8c8d;
+            color: white;
+            width: 100%;
+            margin-top: 1.5rem;
+            margin-bottom: 15px;
+        }
+
+        #back-button:hover {
+            box-shadow: 0 8px 16px rgba(127, 140, 141, 0.2);
+            transform: translateY(-3px);
+        }
+        
+        #score-board {
+            display: flex;
+            justify-content: space-around;
+            background-color: #3a4450;
+            padding: 1.5rem;
+            border-radius: 1.25rem;
+            margin-bottom: 2rem;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.4);
+        }
+
+        .score-item {
+            text-align: center;
+            color: #a9b1b7;
+            font-weight: 600;
+        }
+
+        .score-value {
+            font-size: 2rem;
+            color: #66fcf1;
+            font-weight: 700;
+        }
+
+        .score-label {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+        }
+        
+        .copyright-text {
+            color: #5a646c;
+        }
+
+        @media (max-width: 600px) {
+            .square {
+                height: 80px;
+                font-size: 2.5rem;
+            }
+            #board {
+                gap: 0.75rem;
+            }
+            .score-value {
+                font-size: 1.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="main-menu">
+        <h2 class="menu-subtitle">Pilih Mode Permainan</h2>
+        <h1>Tic-Tac-Toe</h1>
+        <button id="single-player-button" class="btn-menu">Lawan Komputer</button>
+        <button id="multiplayer-button" class="btn-menu">Mode Multiplayer</button>
+    </div>
+
+    <div id="game-container" class="hidden">
+        <h1>Tic-Tac-Toe</h1>
+        <div id="difficulty-container">
+            <button class="btn-difficulty active" data-difficulty="easy">Mudah</button>
+            <button class="btn-difficulty" data-difficulty="medium">Sedang</button>
+            <button class="btn-difficulty" data-difficulty="hard">Sulit</button>
+        </div>
+        <div id="score-board">
+            <div class="score-item">
+                <div class="score-value" id="player1-score">0</div>
+                <div class="score-label" id="player1-label">Anda</div>
+            </div>
+            <div class="score-item">
+                <div class="score-value" id="player2-score">0</div>
+                <div class="score-label" id="player2-label">CPU</div>
+            </div>
+            <div class="score-item">
+                <div class="score-value" id="draw-score">0</div>
+                <div class="score-label">Seri</div>
+            </div>
+        </div>
+        <div id="message"></div>
+        <div id="board">
+            <!-- Kotak-kotak permainan akan dibuat oleh JavaScript -->
+        </div>
+        <div class="control-buttons">
+            <button id="new-round-button">Mulai Babak Baru</button>
+            <button id="new-game-button">Mulai Game Baru</button>
+        </div>
+        <button id="back-button">Kembali ke Menu Utama</button>
+    </div>
+
+    <script>
+        const mainMenu = document.getElementById('main-menu');
+        const gameContainer = document.getElementById('game-container');
+        const singlePlayerButton = document.getElementById('single-player-button');
+        const multiplayerButton = document.getElementById('multiplayer-button');
+        const backButton = document.getElementById('back-button');
+
+        const boardElement = document.getElementById('board');
+        const messageElement = document.getElementById('message');
+        const newRoundButton = document.getElementById('new-round-button');
+        const newGameButton = document.getElementById('new-game-button');
+        const difficultyButtons = document.querySelectorAll('.btn-difficulty');
+        const difficultyContainer = document.getElementById('difficulty-container');
+        const player1ScoreEl = document.getElementById('player1-score');
+        const player2ScoreEl = document.getElementById('player2-score');
+        const player1Label = document.getElementById('player1-label');
+        const player2Label = document.getElementById('player2-label');
+        const drawScoreEl = document.getElementById('draw-score');
+
+        let board = ['', '', '', '', '', '', '', '', ''];
+        let currentPlayer = 'X';
+        let gameActive = true;
+        let difficulty = 'easy';
+        let scores = { player1: 0, player2: 0, draw: 0 };
+        let gameMode = 'singlePlayer'; // 'singlePlayer' or 'multiplayer'
+
+        // Kombinasi kemenangan
+        const winningCombinations = [
+            [0, 1, 2],
+            [3, 4, 5],
+            [6, 7, 8],
+            [0, 3, 6],
+            [1, 4, 7],
+            [2, 5, 8],
+            [0, 4, 8],
+            [2, 4, 6]
+        ];
+
+        // Fungsi untuk mengupdate tampilan skor
+        function updateScoreDisplay() {
+            player1ScoreEl.textContent = scores.player1;
+            player2ScoreEl.textContent = scores.player2;
+            drawScoreEl.textContent = scores.draw;
+        }
+
+        // Fungsi untuk membuat dan menampilkan papan permainan
+        function renderBoard() {
+            boardElement.innerHTML = '';
+            board.forEach((value, index) => {
+                const square = document.createElement('div');
+                square.classList.add('square');
+                square.setAttribute('data-index', index);
+                square.textContent = value;
+                if (value === 'X') {
+                    square.classList.add('player');
+                } else if (value === 'O') {
+                    square.classList.add(gameMode === 'singlePlayer' ? 'cpu' : 'p2');
+                }
+                square.addEventListener('click', () => handleSquareClick(index));
+                boardElement.appendChild(square);
+            });
+        }
+
+        // Fungsi untuk mengupdate pesan status
+        function setMessage(msg, color = '#a9b1b7') {
+            messageElement.textContent = msg;
+            messageElement.style.color = color;
+        }
+
+        // Fungsi untuk mereset permainan
+        function resetGame(resetScores) {
+            board = ['', '', '', '', '', '', '', '', ''];
+            currentPlayer = 'X';
+            gameActive = true;
+            renderBoard();
+            setMessage(gameMode === 'singlePlayer' ? 'Giliran Anda' : 'Giliran Pemain 1');
+            if (resetScores) {
+                scores = { player1: 0, player2: 0, draw: 0 };
+                updateScoreDisplay();
+            }
+        }
+
+        // Fungsi untuk memeriksa pemenang
+        function checkWinner() {
+            for (const combination of winningCombinations) {
+                const [a, b, c] = combination;
+                if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+                    gameActive = false;
+                    const winningSymbol = board[a];
+                    
+                    document.querySelectorAll('.square').forEach((square, index) => {
+                        if (combination.includes(index)) {
+                            square.classList.add('winner');
+                        }
+                    });
+
+                    if (winningSymbol === 'X') {
+                        setMessage((gameMode === 'singlePlayer' ? 'Anda' : 'Pemain 1') + ' Menang!', '#2ecc71');
+                        scores.player1++;
+                    } else {
+                        setMessage((gameMode === 'singlePlayer' ? 'CPU' : 'Pemain 2') + ' Menang!', '#e74c3c');
+                        scores.player2++;
+                    }
+                    updateScoreDisplay();
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        // Fungsi untuk memeriksa hasil seri
+        function checkDraw() {
+            if (!board.includes('')) {
+                gameActive = false;
+                setMessage('Permainan Seri!', '#f39c12');
+                scores.draw++;
+                updateScoreDisplay();
+                return true;
+            }
+            return false;
+        }
+
+        // Logika AI - Mode Mudah
+        function cpuMoveEasy() {
+            const emptySquares = board.map((val, idx) => val === '' ? idx : null).filter(val => val !== null);
+            if (emptySquares.length > 0) {
+                const randomIndex = Math.floor(Math.random() * emptySquares.length);
+                return emptySquares[randomIndex];
+            }
+            return null;
+        }
+
+        // Logika AI - Mode Sedang
+        function cpuMoveMedium() {
+            // 1. Cek apakah CPU bisa menang di giliran ini
+            for (const combo of winningCombinations) {
+                const [a, b, c] = combo;
+                const squares = [board[a], board[b], board[c]];
+                if (squares.filter(s => s === 'O').length === 2 && squares.includes('')) {
+                    return combo[squares.indexOf('')];
+                }
+            }
+            // 2. Cek apakah pemain bisa menang, dan blokir
+            for (const combo of winningCombinations) {
+                const [a, b, c] = combo;
+                const squares = [board[a], board[b], board[c]];
+                if (squares.filter(s => s === 'X').length === 2 && squares.includes('')) {
+                    return combo[squares.indexOf('')];
+                }
+            }
+            // 3. Ambil sudut atau tengah jika kosong
+            const corners = [0, 2, 6, 8];
+            const center = 4;
+            if (board[center] === '') return center;
+            for (const corner of corners) {
+                if (board[corner] === '') return corner;
+            }
+            // 4. Jika tidak ada, ambil posisi acak
+            return cpuMoveEasy();
+        }
+        
+        // Algoritma Minimax untuk Mode Sulit
+        function minimax(newBoard, player) {
+            const emptySquares = newBoard.map((val, idx) => val === '' ? idx : null).filter(val => val !== null);
+
+            // Cek kondisi terminal (menang/seri)
+            for (const combo of winningCombinations) {
+                const [a, b, c] = combo;
+                if (newBoard[a] && newBoard[a] === newBoard[b] && newBoard[a] === newBoard[c]) {
+                    if (newBoard[a] === 'X') return { score: -10 };
+                    if (newBoard[a] === 'O') return { score: 10 };
+                }
+            }
+            if (emptySquares.length === 0) {
+                return { score: 0 };
+            }
+
+            const moves = [];
+
+            for (let i = 0; i < emptySquares.length; i++) {
+                const move = {};
+                move.index = emptySquares[i];
+                newBoard[emptySquares[i]] = player;
+
+                if (player === 'O') {
+                    const result = minimax(newBoard, 'X');
+                    move.score = result.score;
+                } else {
+                    const result = minimax(newBoard, 'O');
+                    move.score = result.score;
+                }
+
+                newBoard[emptySquares[i]] = '';
+                moves.push(move);
+            }
+
+            let bestMove;
+            if (player === 'O') {
+                let bestScore = -Infinity;
+                for (let i = 0; i < moves.length; i++) {
+                    if (moves[i].score > bestScore) {
+                        bestScore = moves[i].score;
+                        bestMove = i;
+                    }
+                }
+            } else {
+                let bestScore = Infinity;
+                for (let i = 0; i < moves.length; i++) {
+                    if (moves[i].score < bestScore) {
+                        bestScore = moves[i].score;
+                        bestMove = i;
+                    }
+                }
+            }
+            return moves[bestMove];
+        }
+
+        // Logika giliran CPU
+        function handleCpuTurn() {
+            if (!gameActive) return;
+
+            setTimeout(() => {
+                let cpuIndex;
+                if (difficulty === 'easy') {
+                    cpuIndex = cpuMoveEasy();
+                } else if (difficulty === 'medium') {
+                    cpuIndex = cpuMoveMedium();
+                } else if (difficulty === 'hard') {
+                    cpuIndex = minimax(board, 'O').index;
+                }
+                
+                if (cpuIndex !== null) {
+                    board[cpuIndex] = 'O';
+                    renderBoard();
+                    if (!checkWinner() && !checkDraw()) {
+                        currentPlayer = 'X';
+                        setMessage('Giliran Anda');
+                    }
+                }
+            }, 500);
+        }
+
+        // Handler klik kotak
+        function handleSquareClick(index) {
+            if (!gameActive || board[index] !== '') {
+                return;
+            }
+
+            board[index] = currentPlayer;
+            renderBoard();
+            
+            if (!checkWinner() && !checkDraw()) {
+                if (gameMode === 'singlePlayer') {
+                    currentPlayer = 'O';
+                    setMessage('Giliran CPU');
+                    handleCpuTurn();
+                } else {
+                    currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+                    setMessage(currentPlayer === 'X' ? 'Giliran Pemain 1' : 'Giliran Pemain 2');
+                }
+            }
+        }
+
+        // Event listeners untuk tombol mode kesulitan
+        difficultyButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                difficultyButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+                difficulty = button.dataset.difficulty;
+                resetGame(true);
+            });
+        });
+
+        // Event listener untuk tombol mulai babak baru
+        newRoundButton.addEventListener('click', () => resetGame(false));
+        
+        // Event listener untuk tombol mulai game baru
+        newGameButton.addEventListener('click', () => resetGame(true));
+
+        // Fungsi untuk menampilkan menu utama
+        function showMainMenu() {
+            mainMenu.classList.remove('hidden');
+            gameContainer.classList.add('hidden');
+        }
+
+        // Fungsi untuk memulai permainan
+        function startGame() {
+            mainMenu.classList.add('hidden');
+            gameContainer.classList.remove('hidden');
+            resetGame(true);
+        }
+        
+        // Event listener untuk tombol menu utama
+        singlePlayerButton.addEventListener('click', () => {
+            gameMode = 'singlePlayer';
+            difficultyContainer.classList.remove('hidden');
+            player1Label.textContent = 'Anda';
+            player2Label.textContent = 'CPU';
+            startGame();
+        });
+
+        multiplayerButton.addEventListener('click', () => {
+            gameMode = 'multiplayer';
+            difficultyContainer.classList.add('hidden');
+            player1Label.textContent = 'Pemain 1';
+            player2Label.textContent = 'Pemain 2';
+            startGame();
+        });
+        
+        backButton.addEventListener('click', showMainMenu);
+
+        // Inisialisasi awal, menampilkan menu utama
+        showMainMenu();
+    </script>
+</body>
+</html>
